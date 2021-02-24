@@ -1,7 +1,5 @@
-import React from 'react'
+import FirebaseContext, { withFirebase } from "./context";
+import Firebase from "./firebase";
 
-function index() {
-  return <div></div>
-}
-
-export default index
+export default Firebase;
+export { FirebaseContext, withFirebase };
