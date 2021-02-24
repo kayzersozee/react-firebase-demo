@@ -1,7 +1,5 @@
-import React from 'react'
+import React from "react";
+import AuthUserContext from "./context";
+import withAuthentication from "./withAuthentication";
 
-function index() {
-  return <div></div>
-}
-
-export default index
+export { AuthUserContext, withAuthentication };
