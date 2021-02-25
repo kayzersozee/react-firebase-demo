@@ -5,6 +5,8 @@ import "firebase/database";
 const config = {
   apiKey: "AIzaSyBSUuV4MTQ9tdPU9BvUGwl4UijYch11Ie4",
   authDomain: "react-firebase-demo-e350f.firebaseapp.com",
+  databaseURL:
+    "https://react-firebase-demo-e350f-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "react-firebase-demo-e350f",
   storageBucket: "react-firebase-demo-e350f.appspot.com",
   messagingSenderId: "1021804410846",
@@ -21,8 +23,6 @@ class Firebase {
     this.db = app.database();
   }
 
-  // *** Auth API ***
-
   doCreateUserWithEmailAndPassword = (email, password) =>
     this.auth.createUserWithEmailAndPassword(email, password);
 
@@ -32,8 +32,34 @@ class Firebase {
   doSignOut = () => this.auth.signOut();
 
   doPasswordReset = (email) => this.auth.sendPasswordResetEmail(email);
+
   doPasswordUpdate = (password) =>
     this.auth.currentUser.updatePassword(password);
+
+  // *** Merge Auth and DB User API *** //
+  onAuthUserListener = (next, fallback) =>
+    this.auth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        this.user(authUser.uid)
+          .once("value")
+          .then((snapshot) => {
+            const dbUser = snapshot.val();
+            // default empty roles
+            if (!dbUser.roles) {
+              dbUser.roles = {};
+            }
+            // merge auth and db user
+            authUser = {
+              uid: authUser.uid,
+              email: authUser.email,
+              ...dbUser,
+            };
+            next(authUser);
+          });
+      } else {
+        fallback();
+      }
+    });
 
   // *** User API ***
   user = (uid) => this.db.ref(`users/${uid}`);
